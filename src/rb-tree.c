@@ -1,4 +1,86 @@
+#include <stdio.h>
 #include "rb-tree.h"
+
+static void post_order_free(RBNode* root) {
+	if (root) {
+		post_order_free(root->left);
+		post_order_free(root->right);
+		free(root);
+	}
+}
+
+void freeRBTree(RBTree* tree) {
+	if (tree) {
+		post_order_free(tree->root);
+		free(tree);
+	}
+}
+
+static int _rb_check(RBTree* tree,RBNode* root,int blackNodeCount,int currBlackNodeCount) {
+	if (root == NULL) {
+		return 1;
+	}
+
+	RBNode* p = root->parent;
+
+	if (root->color == RED && p->color == RED) {
+		printf("存在连续红结点");
+		return 0;// 连续红结点
+	}
+
+	if (p) {
+		if (root == p->left) {
+			if (!(root->key < p->key)) {
+				printf("不是bst");
+				return 0;
+			}
+		}
+		else {
+			if (!(root->key > p->key)) {
+				printf("不是bst");
+				return 0;
+			}
+		}
+	}
+
+	if (root->color == BLACK) {
+		currBlackNodeCount++;
+	}
+
+	if (root->left == NULL || root->right == NULL) {
+		if (currBlackNodeCount != blackNodeCount) {
+			printf("黑色节点数不一致");
+			return 0;
+		}
+	}
+
+	return _rb_check(tree, root->left, blackNodeCount, currBlackNodeCount)
+		&& _rb_check(tree, root->right, blackNodeCount, currBlackNodeCount);
+}
+
+int rb_check(RBTree* tree) {
+	if (tree->root == NULL) {
+		return 1;
+	}
+
+	if (tree->root->color== RED) {
+		printf("根节点为红色");
+		return 0;
+	}
+
+	RBNode* curr = tree->root;
+	int blackNodeCount = 0;
+	while (curr)
+	{
+		if (curr->color == BLACK) {
+			blackNodeCount++;
+		}
+		curr = curr->left;
+	}
+
+	return _rb_check(tree, tree->root, blackNodeCount, 0);
+}
+
 
 RBNode* newRBNode(int key) {
 	RBNode* node = (RBNode*)malloc(sizeof(RBNode));
@@ -53,9 +135,9 @@ static RBNode* prev(RBNode* node) {
 
 static RBNode* left_rotate(RBTree* tree, RBNode* node) {
 	RBNode* p = node->parent;
-	int node_is_left_node = p ? is_left_node(p) : 0;
+	int node_is_left_node = p ? is_left_node(node) : 0;
 
-	RBNode* right = p->right;
+	RBNode* right = node->right;
 	RBNode* right_left = right->left;
 
 	right->left = node;
@@ -134,21 +216,30 @@ static void insert_balance(RBTree* tree, RBNode* node) {
 				if (is_black_or_null(uncle)) {
 					if (is_left_node(p)) {
 						if (is_left_node(node)) {// case 1
-
+							p->color = BLACK;
+							pp->color = RED;
+							right_rotate(tree,pp);
+							return;
 						}
 						else {// case 2
-
+							left_rotate(tree, p);
+							insert_balance(tree, p);
+							return;
 						}
 					}
 					else {
 						if (!is_left_node(node)) {// case 3
-
+							p->color = BLACK;
+							pp->color = RED;
+							left_rotate(tree, pp);
+							return;
 						}
 						else {// case 4
-
+							right_rotate(tree, p);
+							insert_balance(tree, p);
+							return;
 						}
 					}
-					// case 1
 				}
 				else {
 					pp->color = RED;

@@ -24,6 +24,9 @@ typedef struct RBTree
 
 RBNode* newRBNode(int key);
 RBTree* newRBTree();
+void freeRBTree(RBTree* tree);
+
+int rb_check(RBTree* tree);
 
 void rb_init(RBTree* tree,int arr[],int count);
 void rb_insert(RBTree* tree, int key);
