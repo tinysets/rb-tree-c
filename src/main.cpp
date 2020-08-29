@@ -1,5 +1,8 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <chrono>
 #include "rb-tree.h"
+using namespace std::chrono;
 
 double random_0_1() {
 	int rd = rand() * 10000 + rand() * 1000 + rand() * 100 + rand() * 10 + rand() * 1;
@@ -12,8 +15,10 @@ double random_0_1() {
 int main() {
 
 	if (1) { // test insert
+		system_clock::time_point start_time = system_clock::now();
+
 		int insertTestCount = 100;
-		int ranCount = 1000;
+		int ranCount = 100000;
 		int* rbarr = (int*)malloc(sizeof(int) * ranCount);
 
 		for (int j = 0; j < insertTestCount; j++) {
@@ -29,6 +34,11 @@ int main() {
 				break;
 			}
 		}
+		free(rbarr);
+
+		system_clock::time_point end_time = system_clock::now();
+		duration<double, std::milli> diff = end_time - start_time;
+		printf("插入测试时间为 %lf ms", diff.count());
 	}
 
 	return 0;

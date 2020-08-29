@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.c" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\rb-tree.c" />
   </ItemGroup>
   <ItemGroup>
