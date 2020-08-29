@@ -24,20 +24,20 @@ static int _rb_check(RBTree* tree, RBNode* root, int blackNodeCount, int currBla
 	RBNode* p = root->parent;
 
 	if (root->color == RED && p->color == RED) {
-		printf("存在连续红结点");
+		printf("存在连续红结点\n");
 		return 0;// 连续红结点
 	}
 
 	if (p) {
 		if (root == p->left) {
 			if (!(root->key < p->key)) {
-				printf("不是bst");
+				printf("不是bst\n");
 				return 0;
 			}
 		}
 		else {
 			if (!(root->key > p->key)) {
-				printf("不是bst");
+				printf("不是bst\n");
 				return 0;
 			}
 		}
@@ -49,7 +49,7 @@ static int _rb_check(RBTree* tree, RBNode* root, int blackNodeCount, int currBla
 
 	if (root->left == NULL || root->right == NULL) {
 		if (currBlackNodeCount != blackNodeCount) {
-			printf("黑色节点数不一致");
+			printf("黑色节点数不一致\n");
 			return 0;
 		}
 	}
@@ -64,7 +64,7 @@ int rb_check(RBTree* tree) {
 	}
 
 	if (tree->root->color == RED) {
-		printf("根节点为红色");
+		printf("根节点为红色\n");
 		return 0;
 	}
 
@@ -298,8 +298,143 @@ void rb_insert(RBTree* tree, int key) {
 }
 
 static void delete_balance(RBTree* tree, RBNode* x, RBNode* p) {
+	if (x && x == tree->root) {
+		x->color = BLACK;
+		return;
+	}
 
+	if (x == p->left) {
+		RBNode* s = p->right;
+		RBNode* sl = s->left;
+		RBNode* sr = s->right;
+		if (s->color == BLACK) {
+			if (p->color == RED) {
+				// case 1
+				if (is_black_or_null(sl) && is_black_or_null(sr)) {
+					// case 1.1
+					p->color = BLACK;
+					s->color = RED;
+					return;
+				}
+				else if(sr && sr->color == RED){
+					// case 1.2
+					p->color = BLACK;
+					sr->color = BLACK;
+					s->color = RED;
+					left_rotate(tree,p);
+					return;
+				}
+				else {
+					// case 1.3
+					sl->color = BLACK;
+					s->color = RED;
+					right_rotate(tree,s);// to case 1.2
+					delete_balance(tree, x, p);
+					return;
+				}
+			}
+			else {
+				// case 2
+				if (is_black_or_null(sl) && is_black_or_null(sr)) {
+					// case 2.1
+					s->color = RED;
+					delete_balance(tree,p,p->parent); // one more time delete_balance
+					return;
+				}
+				else if(sr && sr->color == RED) {
+					// case 2.2
+					p->color = BLACK;
+					sr->color = BLACK;
+					s->color = BLACK;
+					left_rotate(tree, p);
+					return;
+				}
+				else {
+					// case 2.3
+					sl->color = BLACK;
+					s->color = RED;
+					right_rotate(tree, s);// to case 2.2
+					delete_balance(tree, x, p);
+					return;
+				}
+			}
+		}
+		else
+		{
+			// case 3
+			p->color = RED;
+			s->color = BLACK;
+			left_rotate(tree, p);// to case 1
+			delete_balance(tree, x, p);
+			return;
+		}
+	}
+	else {
+		RBNode* s = p->left;
+		RBNode* sl = s->left;
+		RBNode* sr = s->right;
 
+		if (s->color == BLACK) {
+			if (p->color== RED) {
+				// case 1
+				if (is_black_or_null(sl) && is_black_or_null(sr)) {
+					// case 1.1
+					p->color = BLACK;
+					s->color = RED;
+					return;
+				}
+				else if(sl && sl->color == RED) {
+					// case 1.2
+					p->color = BLACK;
+					sl->color = BLACK;
+					s->color = RED;
+					right_rotate(tree, p);
+					return;
+				}
+				else {
+					// case 1.3
+					sr->color = BLACK;
+					s->color = RED;
+					left_rotate(tree,s);// to case 1.2
+					delete_balance(tree,x,p);
+					return;
+				}
+			}
+			else {
+				// case 2
+				if (is_black_or_null(sl) && is_black_or_null(sr)) {
+					// case 2.1
+					s->color = RED;
+					delete_balance(tree,p,p->parent);// one more time delete_balance
+					return;
+				}
+				else if (sl && sl->color == RED) {
+					// case 2.2
+					p->color = BLACK;
+					s->color = BLACK;
+					sl->color = BLACK;
+					right_rotate(tree, p);
+					return;
+				}
+				else {
+					// case 2.3
+					sr->color = BLACK;
+					s->color = RED;
+					left_rotate(tree, s);// to case 2.2
+					delete_balance(tree, x, p);
+					return;
+				}
+			}
+		}
+		else {
+			// case 3
+			p->color = RED;
+			s->color = BLACK;
+			right_rotate(tree, p);// to case 1
+			delete_balance(tree, x, p);
+			return;
+		}
+	}
 }
 
 static void rb_delete_node(RBTree* tree, RBNode* root) {

@@ -18,7 +18,7 @@ int main() {
 		system_clock::time_point start_time = system_clock::now();
 
 		int insertTestCount = 100;
-		int ranCount = 100000;
+		int ranCount = 1000;
 		int* rbarr = (int*)malloc(sizeof(int) * ranCount);
 
 		for (int j = 0; j < insertTestCount; j++) {
@@ -38,7 +38,38 @@ int main() {
 
 		system_clock::time_point end_time = system_clock::now();
 		duration<double, std::milli> diff = end_time - start_time;
-		printf("插入测试时间为 %lf ms", diff.count());
+		printf("插入测试时间为 %lf ms \n", diff.count());
+	}
+
+
+	if (1) { // test delete
+		system_clock::time_point start_time = system_clock::now();
+
+		int insertTestCount = 100;
+		int ranCount = 1000;
+		int* rbarr = (int*)malloc(sizeof(int) * ranCount);
+
+		for (int j = 0; j < insertTestCount; j++) {
+			for (int i = 0; i < ranCount; i++) {
+				rbarr[i] = random_0_1() * 1000000;
+			}
+			RBTree* rbTree = newRBTree();
+			rb_init(rbTree, rbarr, ranCount);
+			rb_check(rbTree);
+
+			for (int i = 0; i < ranCount; i++) {
+				rb_delete(rbTree, rbarr[i]);
+				rb_check(rbTree);
+			}
+
+			freeRBTree(rbTree);
+			rbTree = NULL;
+		}
+		free(rbarr);
+
+		system_clock::time_point end_time = system_clock::now();
+		duration<double, std::milli> diff = end_time - start_time;
+		printf("插入删除时间为 %lf ms \n", diff.count());
 	}
 
 	return 0;
