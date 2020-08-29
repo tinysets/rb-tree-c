@@ -16,7 +16,7 @@ void freeRBTree(RBTree* tree) {
 	}
 }
 
-static int _rb_check(RBTree* tree,RBNode* root,int blackNodeCount,int currBlackNodeCount) {
+static int _rb_check(RBTree* tree, RBNode* root, int blackNodeCount, int currBlackNodeCount) {
 	if (root == NULL) {
 		return 1;
 	}
@@ -63,7 +63,7 @@ int rb_check(RBTree* tree) {
 		return 1;
 	}
 
-	if (tree->root->color== RED) {
+	if (tree->root->color == RED) {
 		printf("根节点为红色");
 		return 0;
 	}
@@ -218,7 +218,7 @@ static void insert_balance(RBTree* tree, RBNode* node) {
 						if (is_left_node(node)) {// case 1
 							p->color = BLACK;
 							pp->color = RED;
-							right_rotate(tree,pp);
+							right_rotate(tree, pp);
 							return;
 						}
 						else {// case 2
@@ -297,6 +297,90 @@ void rb_insert(RBTree* tree, int key) {
 	tree->root->color = BLACK;
 }
 
-void rb_delete(RBTree* tree, int key) {
+static void delete_balance(RBTree* tree, RBNode* x, RBNode* p) {
 
+
+}
+
+static void rb_delete_node(RBTree* tree, RBNode* root) {
+	RBNode* p = root->parent;
+	if (!root->left && !root->right) {
+		if (root->color == BLACK) {
+			// case 1.1
+			if (!p) {
+				free(root);
+				tree->root = NULL;
+				return;
+			}
+			else {
+				// parent must be exist,and sibling must be exist
+				if (is_left_node(root)) {
+					free(root);
+					p->left = NULL;
+					delete_balance(tree, p->left, p);
+					return;
+				}
+				else {
+					free(root);
+					p->right = NULL;
+					delete_balance(tree, p->right, p);
+					return;
+				}
+			}
+		}
+		else {
+			// case 1.2
+			// parent must be exist
+			if (is_left_node(root)) {
+				free(root);
+				p->left = NULL;
+			}
+			else {
+				free(root);
+				p->right = NULL;
+			}
+			return;
+		}
+	}
+	else if ((root->left && !root->right) || (!root->left && root->right)) {
+		if (root->left) { // case 2.1
+			root->key = root->left->key;
+			free(root->left);
+			root->left = NULL;
+		}
+		else {// case 2.2
+			root->key = root->right->key;
+			free(root->right);
+			root->right = NULL;
+		}
+		return;
+	}
+	else {
+		// case 3
+		RBNode* prev_node = prev(root);
+		root->key = prev_node->key;
+		rb_delete_node(tree, prev_node);
+		return;
+	}
+}
+
+void rb_delete(RBTree* tree, int key) {
+	RBNode* root = tree->root;
+
+	while (root)
+	{
+		if (key < root->key) {
+			root = root->left;
+		}
+		else if (key > root->key) {
+			root = root->right;
+		}
+		else {
+			rb_delete_node(tree, root);
+			break;
+		}
+	}
+	if (tree->root) {
+		tree->root->color = BLACK;
+	}
 }
